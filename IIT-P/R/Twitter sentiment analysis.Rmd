@@ -1,0 +1,15 @@
+#Install package from Twitter
+install.packages("twitteR")
+#read Twitter API and extract Data from twitter
+library(twitteR)
+api_key<-'venGhXU0ZR3Fge0dwRTCwyTG7'
+api_key_secret<-'WOJ26rRbfRd2dqyTMNBDZHnBFSeK6ewvnqWcaeQTzYPWE1vgGW'
+access_token_secret<-'AAAAAAAAAAAAAAAAAAAAAL2TIAEAAAAAZhUKJpR1NH8FK9g66Db%2BpMn7paU%3DMPLRsrhk4qDj2R8zxUHAXUh1tVry1TD5lPmmzrba8fhPrkXJqf'
+setup_twitter_oauth(api_key,api_secret_key,access_key_secret)
+tweets<-searchTwitter("AtmaNirbharBharat",n=500)
+#count the number of tweets
+n.tweets<-lenghth(tweets)
+#convert tweets to data frame
+tweets.df<-twListToDF(tweets)
+view(tweets.df)
+

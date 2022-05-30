@@ -1,0 +1,101 @@
+---
+title: "R_Assignment_twitter"
+author: "Laxman"
+date: "10/2/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+#Install package from Twitter
+```{r}
+install.packages("twitteR")
+
+```
+
+#Creating a live connection with twitter
+```{r}
+library(twitteR)
+api_key<-'IbtnD7jelY71oB2ZOW0MogI2Q'
+api_secret<-'enFOEdlDbx9GgXrbH8s1mOyOAj9zVrZ6qtMP4nb9mkoeqNfSel'
+access_token<-'987964433711300614-TTYwLNT79dbdfxMlby5LPOyiYIzkCiS'
+access_token_secret<-'loBbDmoZeylVOlw9iJWC6JfhDBCcTl4Xd4ZzfCDeLM5lZ'
+setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
+```
+
+
+#Pulling Tweets data
+```{r}
+tweets<-searchTwitter("CSKvSRH",n=500,since = "2020-07-01",lang = "en")
+
+```
+
+#count the number of tweets
+```{r}
+n.tweets<-length(tweets)
+
+```
+
+#convert tweets to data frame
+```{r}
+tweets.df<-twListToDF(tweets)
+View(tweets.df)
+```
+
+
+#to get the text
+```{r}
+tweets_text <- tweets$text
+str(tweets_text)
+```
+
+#cleaning Names and other RT
+```{r}
+tweets.df$text=gsub("&amp", "", tweets.df$text)
+tweets.df$text = gsub("&amp", "", tweets.df$text)
+tweets.df$text = gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", tweets.df$text)
+tweets.df$text = gsub("@\\w+", "", tweets.df$text)
+tweets.df$text = gsub("[[:punct:]]", "", tweets.df$text)
+tweets.df$text = gsub("[[:digit:]]", "", tweets.df$text)
+tweets.df$text = gsub("http\\w+", "", tweets.df$text)
+tweets.df$text = gsub("[ \t]{2,}", "", tweets.df$text)
+tweets.df$text = gsub("^\\s+|\\s+$", "", tweets.df$text)
+tweets.df$text = gsub("http[^[:blank:]]+","",tweets.df$text)
+tweets.df$text = gsub("[^\x01-\x7F]","",tweets.df$text)
+amzn<-Corpus(VectorSource(tweets.df$text))
+amzn<-tm_map(amzn,content_transformer(removeNumbers))
+amzn<-tm_map(amzn,removePunctuation)
+amzn<-tm_map(amzn,content_transformer(tolower))
+amzn<-tm_map(amzn,stripWhitespace)
+amzn<-tm_map(amzn,removeWords,stopwords("english"))
+mystopword<-"cskvssrh"
+amzn<-tm_map(amzn,removeWords,mystopword)
+```
+
+```{r}
+write.csv(tweets.df,"tweetscleaned.csv")
+
+```
+
+
+```{r}
+library(wordcloud)
+wordcloud(amzn,min.freq = 5)
+```
+
+
+```{r}
+write.csv(tweets.df,"Cleanedtweets.csv")
+
+```
+
+
+```{r}
+library(syuzhet)
+Emotion_IPL<-get_nrc_sentiment(tweets.df$text)
+```
+
+
+```{r}
+barplot(colSums(Emotion_IPL),cex.names = 1,col = rainbow(10),main = "Emotion score for SRH vs CSK")
+```
+
